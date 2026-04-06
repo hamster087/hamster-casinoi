@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Hamster Ultimate Casino</title>
+
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+<style>
+body { margin:0; background:#0b0f1a; color:white; font-family:Arial;}
+header { padding:10px; text-align:center; background:#111827;}
+.menu { display:flex; }
+.menu button { flex:1; padding:10px; border:none; background:#22c55e; color:white;}
+.screen { display:none; padding:10px;}
+.active { display:block;}
+.game { background:#1f2937; padding:10px; margin:5px; border-radius:10px;}
+</style>
+</head>
+
+<body>
+
+<header>
+<h2>🐹 Hamster Ultimate Casino</h2>
+<p id="balance"></p>
+</header>
+
+<div class="menu">
+<button onclick="show('games')">🎰 Игры</button>
+<button onclick="show('profile')">👤 Профиль</button>
+<button onclick="show('clan')">🏰 Кланы</button>
+</div>
+
+<div id="games" class="screen active"></div>
+
+<div id="profile" class="screen">
+<p id="name"></p>
+<p id="level"></p>
+</div>
+
+<div id="clan" class="screen">
+<p id="clanName"></p>
+<button onclick="createClan()">Создать клан</button>
+</div>
+
+<script>
+
+// ===== ДАННЫЕ =====
+let player = JSON.parse(localStorage.getItem("player")) || {
+  name:"Игрок",
+  balance:1000,
+  level:1,
+  clan:null
+};
+
+function save(){localStorage.setItem("player", JSON.stringify(player));}
+
+// ===== UI =====
+function update(){
+  balance.innerText="💰 "+player.balance+"$";
+  name.innerText="Имя: "+player.name;
+  level.innerText="Уровень: "+player.level;
+  clanName.innerText=player.clan ? "Клан: "+player.clan : "❌ Нет клана";
+  save();
+}
+
+function show(id){
+  document.querySelectorAll('.screen').forEach(e=>e.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+// ===== СОЗДАНИЕ ИГР =====
+const gamesList = [
+"Dice","Slots","Crash","HiLo",
+"Dog Slot","Penalty","SkyFly","Bonanza 1000",
+"Cosmic Spin","Book of Pharaohs","FortuneMine","MineDrop",
+"Сапёр","Blackjack","Keno","Crazy Time","Mega Wheel",
+"Double","Под7","Lucky","Plinko","Wheel Mini","Tower",
+"Limbo","Wheel","Flipper"
+];
+
+gamesList.forEach(g=>{
+  let div=document.createElement("div");
+  div.className="game";
+  div.innerText=g;
+  div.onclick=()=>playGame(g);
+  games.appendChild(div);
+});
+
+// ===== ЛОГИКА ВСЕХ ИГР =====
+function playGame(game){
+
+if(player.balance < 100){
+  alert("Нет денег"); return;
+}
+
+player.balance -= 100;
+
+let rand = Math.random();
+
+switch(game){
+
+case "Dice":
+  if(rand>0.7){ win(700); }
+  else lose();
+break;
+
+case "Slots":
+case "Dog Slot":
+case "Bonanza 1000":
+case "Cosmic Spin":
+case "Book of Pharaohs":
+  if(rand>0.8){ win(500); }
+  else lose();
+break;
+
+case "Crash":
+case "SkyFly":
+  let multi=(Math.random()*5).toFixed(2);
+  if(confirm("x"+multi+" забрать?")) win(100*multi);
+  else lose();
+break;
+
+case "HiLo":
+case "Под7":
+  if(rand>0.5){ win(200); }
+  else lose();
+break;
+
+case "Penalty":
+case "Lucky":
+case "Double":
+  if(rand>0.5){ win(150); }
+  else lose();
+break;
+
+case "Blackjack":
+case "Keno":
+  if(rand>0.6){ win(250); }
+  else lose();
+break;
+
+case "Plinko":
+case "Mega Wheel":
+case "Wheel":
+case "Wheel Mini":
+case "Crazy Time":
+  if(rand>0.75){ win(400); }
+  else lose();
+break;
+
+case "Tower":
+case "MineDrop":
+case "FortuneMine":
+case "Сапёр":
+  if(rand>0.65){ win(300); }
+  else lose();
+break;
+
+case "Limbo":
+  let m=(Math.random()*10).toFixed(2);
+  win(100*m);
+break;
+
+case "Flipper":
+  if(rand>0.5){ win(180); }
+  else lose();
+break;
+
+default:
+  lose();
+}
+
+update();
+}
+
+function win(amount){
+  player.balance += amount;
+  alert("🎉 +" + amount);
+}
+
+function lose(){
+  alert("❌ проигрыш");
+}
+
+// ===== КЛАН =====
+function createClan(){
+  if(player.balance>=500000000000){
+    player.balance-=500000000000;
+    player.clan="Hamsters";
+  } else alert("Нужно 500B");
+  update();
+}
+
+update();
+
+</script>
+
+</body>
+</html>
